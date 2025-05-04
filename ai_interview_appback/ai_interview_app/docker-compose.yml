@@ -1,0 +1,44 @@
+# docker-compose.yml - Orchestrates the application services
+
+version: '3.8'
+
+services:
+  # --- FastAPI Application Service ---
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app # Mount the current directory to /app for easy development/code changes
+    env_file:
+      - .env # Load environment variables from .env file
+    depends_on:
+      - redis # Ensure redis is running before the app starts
+
+  # --- Celery Worker Service ---
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile # Use the same Dockerfile as the app
+    command: sh -c "celery -A app.tasks.celery worker -l info -P solo" # Command to run celery worker
+    volumes:
+      - .:/app # Mount code
+    env_file:
+      - .env # Load environment variables
+    depends_on:
+      - redis # Ensure redis is running before the worker starts
+      - app # Worker needs the app code/context to import tasks
+
+  # --- Redis Service (Message Broker and Result Backend) ---
+  redis:
+    image: redis:7.2-alpine # Use an official Redis image
+    ports:
+      - "6379:6379" # Expose redis port (optional, for external access/monitoring)
+    command: redis-server --appendonly yes # Enable persistence
+
+# You can define volumes here if you need persistent data storage
+# volumes:
+#   redis_data:
+#   app_data: # For STORAGE_PATH

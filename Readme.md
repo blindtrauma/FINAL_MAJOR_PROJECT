@@ -1,4 +1,4 @@
-CHAPTER 3: SYSTEM ARCHITECTURE	
+	
 ![image](https://github.com/user-attachments/assets/47ac2730-8cad-42c7-b168-cac13453fd07)
 
 # AI-Powered Interview System Backend
